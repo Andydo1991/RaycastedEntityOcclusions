@@ -4,7 +4,7 @@ The latest version can currently only be found on Modrinth https://modrinth.com/
 
 This is an async plugin for PaperMC and its forks that hides/culls entities (and tile entities) from players if they do not have line-of-sight.
 
-The supported versions are 1.21.x PaperMC and Pufferfish. Other server versions and software may work too.
+The supported versions are 1.21.x PaperMC, Folia and Pufferfish. Other server versions and software may work too.
 
 Use cases:
 
