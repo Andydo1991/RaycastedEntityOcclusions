@@ -2,10 +2,11 @@ name: RaycastedAntiESP
 version: ${version}
 main: games.cubi.raycastedAntiESP.RaycastedAntiESP
 api-version: '1.21'
+folia-supported: true
 prefix: RaycastedAntiESP
-authors: [ _Cubicake ]
+authors: [ _Cubicake, AndyDayy ]
 load: STARTUP
-website: https://cubi.games
+website: https://cubi.games, AndyDayy.xyz
 permissions:
     raycastedantiesp.command:
         description: Permission to use the /RaycastedAntiESP command

@@ -12,7 +12,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -20,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 public class EngineNewer {
     private final AsyncScheduler asyncScheduler;
-    private final BukkitScheduler bukkitScheduler;
 
     private final RaycastedAntiESP plugin;
     private final ConfigManager config;
@@ -29,7 +27,6 @@ public class EngineNewer {
         this.plugin = plugin;
         this.config = cfg;
         asyncScheduler = plugin.getServer().getAsyncScheduler();
-        bukkitScheduler = plugin.getServer().getScheduler();
 
         forceEntityLocationUpdate();
         processEntityMovements(null); //first one will run on main thread but it shouldn't have to do much anyways
@@ -66,7 +63,7 @@ public class EngineNewer {
     private void forceEntityLocationUpdate() {
         int recheckInterval = ConfigManager.get().getSnapshotConfig().getEntityLocationRefreshInterval();
         if (recheckInterval <= 0) {
-            bukkitScheduler.runTaskLater(plugin, this::forceEntityLocationUpdate, 20 * 30); // Check again in 30 secs if config has changed
+            Bukkit.getGlobalRegionScheduler().runDelayed(plugin, task -> forceEntityLocationUpdate(), 20 * 30); // Check again in 30 secs if config has changed
             return;
         }
         HashMap<UUID, ThreadSafeLoc> entities = new HashMap<>();
@@ -76,7 +73,7 @@ public class EngineNewer {
             }
         }
         DataHolder.entityLocation().updateEntireEntityLocationMap(entities);
-        bukkitScheduler.runTaskLater(plugin, this::forceEntityLocationUpdate, recheckInterval);
+        Bukkit.getGlobalRegionScheduler().runDelayed(plugin, task -> forceEntityLocationUpdate(), recheckInterval);
     }
 
     private void processEntityMovements(ScheduledTask scheduledTask) {
@@ -86,7 +83,7 @@ public class EngineNewer {
 
     private void clearOldCacheEntries() {
         DataHolder.entityVisibility().cleanShouldShowEntityCache();
-        bukkitScheduler.runTaskLater(plugin, this::clearOldCacheEntries, 20 * 120);
+        Bukkit.getGlobalRegionScheduler().runDelayed(plugin, task -> clearOldCacheEntries(), 20 * 120);
     }
 
     private void flushLogCache(ScheduledTask scheduledTask) {

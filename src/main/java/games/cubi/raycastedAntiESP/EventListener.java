@@ -37,14 +37,14 @@ public class EventListener implements Listener {
         this.manager = mgr;
         this.config = cfg;
         this.plugin = plugin;
-        //load packet processor after a tick in a bukkit runnable to ensure the plugin is fully loaded TODO: All schedulers should migrate to paper/folia scheduler, also this should be moved somewhere else, maybe when the config gets the update it passes it on?
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        //load packet processor after a tick using async scheduler to ensure the plugin is fully loaded
+        Bukkit.getAsyncScheduler().runDelayed(plugin, task -> {
             if (DataHolder.isPacketEventsPresent()) {
                 packetProcessor = RaycastedAntiESP.getPacketProcessor();
             } else {
                 packetProcessor = null;
             }
-        }, 1L);
+        }, 50L, java.util.concurrent.TimeUnit.MILLISECONDS);
     }
 
     public static EventListener getInstance(RaycastedAntiESP plugin, ChunkSnapshotManager mgr, ConfigManager cfg) {

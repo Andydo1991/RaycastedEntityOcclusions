@@ -1,5 +1,5 @@
 Latest version: v1.6.3
-
+[⚠️] Vui lòng không sử dụng plugin cho mục đích thương mại!
 The latest version can currently only be found on Modrinth https://modrinth.com/plugin/raycasted-entity-occlusions/
 
 This is an async plugin for PaperMC and its forks that hides/culls entities (and tile entities) from players if they do not have line-of-sight.

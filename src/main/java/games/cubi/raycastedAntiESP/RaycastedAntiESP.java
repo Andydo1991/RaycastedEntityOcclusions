@@ -16,8 +16,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 import games.cubi.raycastedAntiESP.bStats.MetricsCollector;
+import java.util.concurrent.TimeUnit;
 
 public final class RaycastedAntiESP extends JavaPlugin implements CommandExecutor {
     private static ConfigManager cfg;
@@ -75,25 +75,19 @@ public final class RaycastedAntiESP extends JavaPlugin implements CommandExecuto
 
 
         // TODO: Move this somewhere else, the main class should be cleaner
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                tick++; /*
-                EngineOld.runEngine(cfg, snapMgr, tracker, RaycastedEntityOcclusion.this);
-                EngineOld.runTileEngine(cfg, snapMgr, tracker, RaycastedEntityOcclusion.this);*/
-            }
-        }.runTaskTimer(this, 0L, 1L);
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, task -> {
+            tick++; /*
+            EngineOld.runEngine(cfg, snapMgr, tracker, RaycastedEntityOcclusion.this);
+            EngineOld.runTileEngine(cfg, snapMgr, tracker, RaycastedEntityOcclusion.this);*/
+        }, 1L, 1L);
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (packetEventsPresent && Bukkit.getPluginManager().isPluginEnabled("packetevents")) {
-                    DataHolder.setPacketEventsPresent();
-                    packetProcessor = new PacketProcessor(RaycastedAntiESP.get());
-                    Logger.info("PacketEvents is enabled, enabling packet-based tablist modification.", 3);
-                }
+        Bukkit.getAsyncScheduler().runDelayed(this, task -> {
+            if (packetEventsPresent && Bukkit.getPluginManager().isPluginEnabled("packetevents")) {
+                DataHolder.setPacketEventsPresent();
+                packetProcessor = new PacketProcessor(RaycastedAntiESP.get());
+                Logger.info("PacketEvents is enabled, enabling packet-based tablist modification.", 3);
             }
-        }.runTaskLater(this, 1L);
+        }, 50L, TimeUnit.MILLISECONDS);
     }
 
     @Override

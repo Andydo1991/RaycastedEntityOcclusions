@@ -21,7 +21,7 @@ public class UpdateChecker {
     private static CompletableFuture<String> fetchFeaturedVersion(RaycastedAntiESP plugin) {
         CompletableFuture<String> future = new CompletableFuture<>();
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        Bukkit.getAsyncScheduler().runNow(plugin, task -> {
             final String url = "https://api.modrinth.com/v2/project/bCjNZu0C/version";
 
             try (final InputStreamReader reader = new InputStreamReader(new URI(url).toURL().openConnection().getInputStream())) {
@@ -71,8 +71,8 @@ public class UpdateChecker {
 
     public static void checkForUpdates(RaycastedAntiESP plugin, CommandSender audience) {
         fetchFeaturedVersion(plugin).thenAccept(version -> {
-            // This runs synchronously when the version is fetched
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            // This runs on global region scheduler when the version is fetched
+            Bukkit.getGlobalRegionScheduler().run(plugin, task -> {
                 int versionCheck = checkIfLaterThan(plugin.getDescription().getVersion(), version);
 
                 if (versionCheck == VERSIONS_ARE_EQUAL) {

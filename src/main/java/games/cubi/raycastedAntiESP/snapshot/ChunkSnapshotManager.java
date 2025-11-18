@@ -14,12 +14,12 @@ import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Set;
 import java.util.Map;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class ChunkSnapshotManager {
     private static class ChunkData {
@@ -50,22 +50,22 @@ public class ChunkSnapshotManager {
             }
         }
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                long now = System.currentTimeMillis();
-                int chunksRefreshed = 0;
-                int chunksToRefreshMaximum = getNumberOfCachedChunks() / 3;
-                for (Map.Entry<String, ChunkData> e : dataMap.entrySet()) {
-                    if (now - e.getValue().lastRefresh >= cfg.getSnapshotConfig().getWorldSnapshotRefreshInterval() * 1000L && chunksRefreshed < chunksToRefreshMaximum) {
-                        chunksRefreshed++;
-                        String key = e.getKey();
-                        snapshotChunk(key);
-                    }
+        long intervalTicks = cfg.getSnapshotConfig().getWorldSnapshotRefreshInterval() * 2L;
+        long intervalMs = intervalTicks * 50L; // Convert ticks to milliseconds
+        
+        Bukkit.getAsyncScheduler().runAtFixedRate(plugin, task -> {
+            long now = System.currentTimeMillis();
+            int chunksRefreshed = 0;
+            int chunksToRefreshMaximum = getNumberOfCachedChunks() / 3;
+            for (Map.Entry<String, ChunkData> e : dataMap.entrySet()) {
+                if (now - e.getValue().lastRefresh >= cfg.getSnapshotConfig().getWorldSnapshotRefreshInterval() * 1000L && chunksRefreshed < chunksToRefreshMaximum) {
+                    chunksRefreshed++;
+                    String key = e.getKey();
+                    snapshotChunk(key);
                 }
-                Logger.info("ChunkSnapshotManager: Refreshed " + chunksRefreshed + " chunks out of " + chunksToRefreshMaximum + " maximum.", 10);
             }
-        }.runTaskTimerAsynchronously(plugin, cfg.getSnapshotConfig().getWorldSnapshotRefreshInterval() * 2L, cfg.getSnapshotConfig().getWorldSnapshotRefreshInterval() * 2L /* This runs 10 times per refreshInterval, spreading out the refreshes */);
+            Logger.info("ChunkSnapshotManager: Refreshed " + chunksRefreshed + " chunks out of " + chunksToRefreshMaximum + " maximum.", 10);
+        }, intervalMs, intervalMs, TimeUnit.MILLISECONDS);
     }
 
     public void onChunkLoad(Chunk c) {
